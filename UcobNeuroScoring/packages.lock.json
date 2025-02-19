@@ -20,10 +20,28 @@
           "Microsoft.SourceLink.GitLab": "1.1.1"
         }
       },
+      "JetBrains.Annotations": {
+        "type": "Transitive",
+        "resolved": "2024.2.0",
+        "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
+      },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
         "resolved": "1.1.1",
         "contentHash": "AT3HlgTjsqHnWpBHSNeR0KxbLZD7bztlZVj7I8vgeYG9SYqbeFGh0TM/KVtC6fg53nrWHl3VfZFvb5BiQFcY6Q=="
+      },
+      "Microsoft.Extensions.DependencyInjection": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "V8S3bsm50ig6JSyrbcJJ8bW2b9QLGouz+G1miK3UTaOWmMtFwNNNzUf4AleyDWUmTrWMLNnFSLEQtxmxgNQnNQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "cjWrLkJXK0rs4zofsK4bSdg+jhDLTaxrkXu4gS6Y7MAlCvRyNNgwY/lJi5RDlQOnSZweHqoyvgvbdvQsRIW+hg=="
       },
       "Microsoft.SourceLink.AzureRepos.Git": {
         "type": "Transitive",
@@ -64,6 +82,16 @@
         "dependencies": {
           "Microsoft.Build.Tasks.Git": "1.1.1",
           "Microsoft.SourceLink.Common": "1.1.1"
+        }
+      },
+      "ecommons": {
+        "type": "Project"
+      },
+      "ottergui": {
+        "type": "Project",
+        "dependencies": {
+          "JetBrains.Annotations": "[2024.2.0, )",
+          "Microsoft.Extensions.DependencyInjection": "[8.0.0, )"
         }
       }
     }

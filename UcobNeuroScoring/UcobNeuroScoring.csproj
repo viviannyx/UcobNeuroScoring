@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Dalamud.NET.SDK/11.0.0">
+  <PropertyGroup>
+    <Version>0.0.0.1</Version>
+    <Description>UCoB Neuro Scoring.</Description>
+    <PackageProjectUrl>https://github.com/Yhumi/UcobNeuroScoring</PackageProjectUrl>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Dalamud.Plugin.Bootstrap.targets" />
+  </ItemGroup>
+
+    <PropertyGroup>
+        <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <DalamudPluginPath>$(appdata)\XIVLauncher\installedPlugins\UcobNeuroScoring\$(version)</DalamudPluginPath>
+        <DalamudDevPlugins>$(appdata)\XIVLauncher\devPlugins\UcobNeuroScoring\</DalamudDevPlugins>
+        <AssemblyName>UcobNeuroScoring</AssemblyName>
+        <RootNamespace>UcobNeuroScoring</RootNamespace>
+        <PackageId>UcobNeuroScoring</PackageId>
+        <Product>UcobNeuroScoring</Product>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Platforms>x64</Platforms>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>bin/Release</OutputPath>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Platforms>x64</Platforms>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>$(DalamudDevPlugins)</OutputPath>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+    <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
+  </ItemGroup>
+</Project>
