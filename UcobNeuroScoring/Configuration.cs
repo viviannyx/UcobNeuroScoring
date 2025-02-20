@@ -4,6 +4,7 @@ using ECommons.DalamudServices;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using UcobNeuroScoring.Services;
 using UcobNeuroScoring.UI;
 
 namespace UcobNeuroScoring;
@@ -13,12 +14,15 @@ public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
 
-    public bool ScoringEnabled { get; set; } = false;
+    public bool ScoringEnabled { get; set; } = true;
 
     //NA Defaults
     public Waymarks NeurolinkWaymark1 { get; set; } = Waymarks.One;
     public Waymarks NeurolinkWaymark2 { get; set; } = Waymarks.Two;
     public Waymarks NeurolinkWaymark3 { get; set; } = Waymarks.Three;
+
+    //Scoring version
+    public ScoringType ScoringType { get; set; } = ScoringType.Default;
 
     // the below exist just to make saving less cumbersome
     public void Save()

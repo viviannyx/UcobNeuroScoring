@@ -3,6 +3,7 @@ using ECommons.DalamudServices;
 using ImGuiNET;
 using System;
 using System.Linq;
+using UcobNeuroScoring.Services;
 
 namespace UcobNeuroScoring.UI
 {
@@ -27,6 +28,7 @@ namespace UcobNeuroScoring.UI
             var waymark1 = P.Config.NeurolinkWaymark1;
             var waymark2 = P.Config.NeurolinkWaymark2;
             var waymark3 = P.Config.NeurolinkWaymark3;
+            var scoringType = P.Config.ScoringType;
 
             if (ImGui.Checkbox("Enable Scoring Plugin###UcobNeuroEnabled", ref scoringEnabled))
             {
@@ -38,6 +40,22 @@ namespace UcobNeuroScoring.UI
 
                 if (!scoringEnabled)
                     P.UcobScoring?.Dispose();
+            }
+
+            if (ImGui.BeginCombo($"Scoring Type###UcobNeuroScoringType", P.Config.ScoringType.ToString().Replace('_', ' ')))
+            {
+                foreach (var scoreType in Enum.GetValues(typeof(ScoringType)).Cast<ScoringType>())
+                {
+                    if (ImGui.Selectable($"{scoreType.ToString().Replace('_', ' ')}###ScoreType{scoreType.ToString()}", scoringType == scoreType))
+                    {
+                        P.Config.ScoringType = scoreType;
+                        P.Config.Save();
+
+                        P.UcobScoring?.ResetNeuros();
+                    }
+                }
+
+                ImGui.EndCombo();
             }
 
             if (ImGui.BeginCombo($"Waymark 1###UcobNeuroWaymark1", P.Config.NeurolinkWaymark1.ToString()))
@@ -52,6 +70,8 @@ namespace UcobNeuroScoring.UI
                         P.UcobScoring?.ResetNeuros();
                     }
                 }
+
+                ImGui.EndCombo();
             }
 
             if (ImGui.BeginCombo($"Waymark 2###UcobNeuroWaymark2", P.Config.NeurolinkWaymark2.ToString()))
@@ -66,6 +86,8 @@ namespace UcobNeuroScoring.UI
                         P.UcobScoring?.ResetNeuros();
                     }
                 }
+
+                ImGui.EndCombo();
             }
 
             if (ImGui.BeginCombo($"Waymark 3###UcobNeuroWaymark3", P.Config.NeurolinkWaymark3.ToString()))
@@ -80,6 +102,8 @@ namespace UcobNeuroScoring.UI
                         P.UcobScoring?.ResetNeuros();
                     }
                 }
+
+                ImGui.EndCombo();
             }
         }
     }
