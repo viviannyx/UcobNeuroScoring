@@ -22,7 +22,7 @@ public class Configuration : IPluginConfiguration
     public Waymarks NeurolinkWaymark3 { get; set; } = Waymarks.Three;
 
     //Scoring version
-    public ScoringType ScoringType { get; set; } = ScoringType.Default;
+    public ScoringType ScoringType { get; set; } = ScoringType.Easy;
 
     // the below exist just to make saving less cumbersome
     public void Save()

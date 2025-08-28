@@ -10,6 +10,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using UcobNeuroScoring.UI;
 using static FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Delegates;
 
@@ -107,7 +108,7 @@ namespace UcobNeuroScoring.Services
             if (!EzThrottler.Throttle(Throttler, ThrottleTime)) return;
 
             //I hear your heartbeat to the beat of the drums.
-            Svc.Log.Verbose("[UcobNeuroService] ♥");
+            // Svc.Log.Verbose("[UcobNeuroService] ♥");
             if (WorkingThroughObjects) return;
 
             WorkingThroughObjects = true;
@@ -117,8 +118,8 @@ namespace UcobNeuroScoring.Services
                     x.Name != null 
                     && (x.Name.ToString().Equals("neurolink", StringComparison.CurrentCultureIgnoreCase) 
                     || (string.IsNullOrWhiteSpace(x.Name.ToString()) && x.DataId == NEURO_DATA_ID))).OrderBy(x => x.EntityId);
-            Svc.Log.Debug($"Neuros: {neurosOnField.Count()}");
-            Svc.Log.Debug($"Scored Neuros: {NeurolinksScored.Count}");
+            //Svc.Log.Debug($"Neuros: {neurosOnField.Count()}");
+            //Svc.Log.Debug($"Neuros: {neurosOnField.Count()}\n\tScored Neuros: {NeurolinksScored.Count}");
             if (neurosOnField.Count() > NeurolinksScored.Count)
             {
                 foreach (var neuro in neurosOnField)
@@ -177,47 +178,97 @@ namespace UcobNeuroScoring.Services
         {
             switch (P.Config.ScoringType)
             {
-                case ScoringType.Harder:
-                    return HarderScoring(waymark, neuro);
-                case ScoringType.Default:
+                case ScoringType.Extreme:
+                    return ExtremeScoring(waymark, neuro);
+                case ScoringType.Hard:
+                    return HardScoring(waymark, neuro);
+                case ScoringType.Easy:
                 default:
-                    return DefaultScoring(waymark, neuro);
+                    return EasyScoring(waymark, neuro);
             }
         }
 
-        private double DefaultScoring(FieldMarker waymark, IGameObject neuro)
+        private double EasyScoring(FieldMarker waymark, IGameObject neuro)
         {
             //To calc the score, we clamp the abs of (waymark.X - neuro.X) between 0 and 1 then * 100 and do 100 - that value. Repeat for Y, sum the values then divide by 2.
+            //Falloff is calculated by taking the distance of the waymark and neuro, dividing it by two, checking if it is outside of a specific range (a deadzone where it will be counted as zero),
+            //and performing math based on how punishing you want it to be.
             var xDistance = Math.Round(Math.Abs(((double)waymark.X / 1000d) - neuro.Position.X), 3);
             var xScore = 100 - (Math.Clamp(xDistance, 0, 2) * 50);
 
             var yDistance = Math.Round(Math.Abs(((double)waymark.Z / 1000d) - neuro.Position.Z), 3);
             var yScore = 100 - (Math.Clamp(yDistance, 0, 2) * 50);
 
-            var score = Math.Round((xScore + yScore) / 2, 2);
+            var distanceOfWaymarkNeuro = Math.Round(Math.Abs((xDistance + yDistance) / 2), 4);
 
-            Svc.Log.Verbose($"[Default Scoring] Waymark ({(double)waymark.X / 1000d}, {(double)waymark.Y / 1000d}) | Neuro ({Math.Round(neuro.Position.X, 3)}, {Math.Round(neuro.Position.Y, 3)}) | XDistance: {xDistance}, XScore: {xScore} | YDistance: {yDistance}, YScore: {yScore}");
+            Svc.Log.Verbose($"waymark neuro distance: {distanceOfWaymarkNeuro}");
+
+            if (distanceOfWaymarkNeuro < .5)
+                distanceOfWaymarkNeuro = 0;
+            else distanceOfWaymarkNeuro = Math.Round(Math.Pow((distanceOfWaymarkNeuro + 1), 2), 4);
+
+            var score = Math.Round((xScore + yScore) / 2 - (distanceOfWaymarkNeuro * 2), 2);
+            if (score < 0)
+                score = 0;
+
+            Svc.Log.Verbose($"[Easy Scoring] Waymark ({(double)waymark.X / 1000d}, {(double)waymark.Y / 1000d}) | Neuro ({Math.Round(neuro.Position.X, 3)}, {Math.Round(neuro.Position.Y, 3)}) | XDistance: {xDistance}, XScore: {xScore} | YDistance: {yDistance}, YScore: {yScore}");
             return score;
         }
 
-        private double HarderScoring(FieldMarker waymark, IGameObject neuro)
+        private double HardScoring(FieldMarker waymark, IGameObject neuro)
         {
             //To calc the score, we clamp the abs of (waymark.X - neuro.X) between 0 and 1 then * 100 and do 100 - that value. Repeat for Y, sum the values then divide by 2.
+            //Falloff is calculated by taking the distance of the waymark and neuro, dividing it by two, checking if it is outside of a specific range (a deadzone where it will be counted as zero),
+            //and performing math based on how punishing you want it to be.
+            var xDistance = Math.Round(Math.Abs(((double)waymark.X / 1000d) - neuro.Position.X), 3);
+             var xScore = 100 - (Math.Clamp(xDistance, 0, 1.6) * 62.5);
+
+             var yDistance = Math.Round(Math.Abs(((double)waymark.Z / 1000d) - neuro.Position.Z), 3);
+             var yScore = 100 - (Math.Clamp(yDistance, 0, 1.6) * 62.5);
+
+            var distanceOfWaymarkNeuro = Math.Round(Math.Abs((xDistance + yDistance) / 2), 4);
+
+            Svc.Log.Verbose($"waymark neuro distance: {distanceOfWaymarkNeuro}");
+
+            if (distanceOfWaymarkNeuro < .2)
+                distanceOfWaymarkNeuro = 0;
+            else distanceOfWaymarkNeuro = Math.Round(Math.Pow((distanceOfWaymarkNeuro + 1), 3.2), 4);
+
+            var score = Math.Round((xScore + yScore) / 2 - (distanceOfWaymarkNeuro * 3.2), 2);
+            if (score < 0)
+                score = 0;
+
+            Svc.Log.Verbose($"[Hard Scoring] Waymark ({(double)waymark.X / 1000d}, {(double)waymark.Y / 1000d}) | Neuro ({Math.Round(neuro.Position.X, 3)}, {Math.Round(neuro.Position.Y, 3)}) | XDistance: {xDistance}, XScore: {xScore} | YDistance: {yDistance}, YScore: {yScore} | distancePower: {distanceOfWaymarkNeuro}");
+            return score;
+        }
+
+        private double ExtremeScoring(FieldMarker waymark, IGameObject neuro)
+        {
+            //To calc the score, we clamp the abs of (waymark.X - neuro.X) between 0 and 1 then * 100 and do 100 - that value. Repeat for Y, sum the values then divide by 2.
+            //Falloff is calculated by taking the distance of the waymark and neuro, dividing it by two, checking if it is outside of a specific range (a deadzone where it will be counted as zero),
+            //and performing math based on how punishing you want it to be.
             var xDistance = Math.Round(Math.Abs(((double)waymark.X / 1000d) - neuro.Position.X), 3);
             var xScore = 100 - (Math.Clamp(xDistance, 0, 1) * 100);
 
             var yDistance = Math.Round(Math.Abs(((double)waymark.Z / 1000d) - neuro.Position.Z), 3);
             var yScore = 100 - (Math.Clamp(yDistance, 0, 1) * 100);
 
-            var score = Math.Round((xScore + yScore) / 2, 2);
+            var distanceOfWaymarkNeuro = Math.Round(Math.Abs((xDistance + yDistance) / 2), 4);
 
-            Svc.Log.Verbose($"[Harder Scoring] Waymark ({(double)waymark.X / 1000d}, {(double)waymark.Y / 1000d}) | Neuro ({Math.Round(neuro.Position.X, 3)}, {Math.Round(neuro.Position.Y, 3)}) | XDistance: {xDistance}, XScore: {xScore} | YDistance: {yDistance}, YScore: {yScore}");
+            // Svc.Log.Verbose($"waymarkPosition: {waymarkPosition}\tneuroPosition: {neuroPosition}");
+
+            Svc.Log.Verbose($"waymark neuro distance: {distanceOfWaymarkNeuro}");
+
+            if (distanceOfWaymarkNeuro < .1)
+                distanceOfWaymarkNeuro = 0;
+            else distanceOfWaymarkNeuro = Math.Round(Math.Pow((distanceOfWaymarkNeuro + 1), 5), 4);
+
+            var score = Math.Round((xScore + yScore) / 2 - (distanceOfWaymarkNeuro * 5), 2);
+            if (score < 0)
+                score = 0;
+
+            Svc.Log.Verbose($"[Extreme Scoring] Waymark ({(double)waymark.X / 1000d}, {(double)waymark.Y / 1000d}) | Neuro ({Math.Round(neuro.Position.X, 3)}, {Math.Round(neuro.Position.Y, 3)}) | XDistance: {xDistance}, XScore: {xScore} | YDistance: {yDistance}, YScore: {yScore} | distancePower: {distanceOfWaymarkNeuro}");
             return score;
-        }
-
-        private double ExtremeScoring(FieldMarker waymark, IGameObject neuro)
-        {
-            return 0;
         }
 
         public static string GetMarkerName(int idx)
@@ -249,11 +300,13 @@ namespace UcobNeuroScoring.Services
         {
             switch (P.Config.ScoringType)
             {
-                case ScoringType.Harder:
-                    return "Harder Scoring";
-                case ScoringType.Default:
+                case ScoringType.Extreme:
+                    return "Extreme Scoring";
+                case ScoringType.Hard:
+                    return "Hard Scoring";
+                case ScoringType.Easy:
                 default:
-                    return "Default Scoring";
+                    return "Easy Scoring";
             }
         }
     
@@ -261,7 +314,8 @@ namespace UcobNeuroScoring.Services
 
     public enum ScoringType
     {
-        Default,
-        Harder
+        Easy,
+        Hard,
+        Extreme
     }
 }

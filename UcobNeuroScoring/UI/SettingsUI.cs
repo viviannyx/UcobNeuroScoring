@@ -4,6 +4,7 @@ using Dalamud.Bindings.ImGui;
 using System;
 using System.Linq;
 using UcobNeuroScoring.Services;
+using System.Numerics;
 
 namespace UcobNeuroScoring.UI
 {
@@ -104,6 +105,11 @@ namespace UcobNeuroScoring.UI
                 }
 
                 ImGui.EndCombo();
+            }
+
+            if (scoringEnabled && scoringType == ScoringType.Extreme)
+            {
+                ImGui.TextColored(new Vector4(1f, 0.2f, 0.2f, 1f), "Warning: Extreme Scoring is meant to be challenging.\n\t\tIt is recommended to play on Easy or Hard.");
             }
         }
     }
