@@ -261,9 +261,9 @@ namespace UcobNeuroScoring.Services
 
             if (distanceOfWaymarkNeuro < .1)
                 distanceOfWaymarkNeuro = 0;
-            else distanceOfWaymarkNeuro = Math.Round(Math.Pow((distanceOfWaymarkNeuro + 1), 5), 4);
+            else distanceOfWaymarkNeuro = Math.Round(Math.Pow((distanceOfWaymarkNeuro + 1), 8.5), 4);
 
-            var score = Math.Round((xScore + yScore) / 2 - (distanceOfWaymarkNeuro * 5), 2);
+            var score = Math.Round((xScore + yScore) / 2 - (distanceOfWaymarkNeuro * 8.5), 2);
             if (score < 0)
                 score = 0;
 
